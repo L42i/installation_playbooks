@@ -1,0 +1,39 @@
+---
+- name: Install SuperCollider on Ubuntu Studio
+  hosts: studio
+  become: yes
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install SuperCollider
+      apt:
+        name:
+          - supercollider
+          - supercollider-server
+          - supercollider-ide
+          - supercollider-language
+          - supercollider-supernova
+          - sc3-plugins
+        state: present
+
+    - name: Verify sclang is installed
+      command: which sclang
+      register: sclang_path
+      changed_when: false
+
+    - name: Show sclang path
+      debug:
+        msg: "sclang installed at {{ sclang_path.stdout }}"
+
+    - name: Verify scsynth is installed
+      command: which scsynth
+      register: scsynth_path
+      changed_when: false
+
+    - name: Show scsynth path
+      debug:
+        msg: "scsynth installed at {{ scsynth_path.stdout }}"

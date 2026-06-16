@@ -1,0 +1,29 @@
+---
+- name: Install IEM Plug-in Suite on Ubuntu Studio
+  hosts: studio
+  become: yes
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        lock_timeout: 300
+
+    - name: Install IEM Plug-in Suite
+      apt:
+        name:
+          - iem-plugin-suite-vst
+          - iem-plugin-suite-vst3
+          - iem-plugin-suite-standalone
+        state: present
+        lock_timeout: 300
+
+    - name: Verify IEM packages are installed
+      shell: dpkg -l | grep -i iem-plugin-suite
+      register: iem_packages
+      changed_when: false
+
+    - name: Show installed IEM packages
+      debug:
+        msg: "{{ iem_packages.stdout_lines }}"

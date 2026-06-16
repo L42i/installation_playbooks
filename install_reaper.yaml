@@ -1,0 +1,51 @@
+---
+- name: Install REAPER on Ubuntu Studio
+  hosts: studio
+  become: yes
+
+  vars:
+    reaper_tar_local: /Users/adityarpawar/Desktop/Summer2026/l42i/reaper_install/reaper774_linux_x86_64.tar.xz
+    reaper_remote_dir: /home/l42i/Desktop/reaper_install
+    reaper_tar_remote: /home/l42i/Desktop/reaper_install/reaper774_linux_x86_64.tar.xz
+    reaper_install_dir: /opt
+
+  tasks:
+    - name: Create REAPER install folder on Ubuntu Desktop
+      file:
+        path: "{{ reaper_remote_dir }}"
+        state: directory
+        owner: l42i
+        group: l42i
+        mode: "0755"
+
+    - name: Copy REAPER tar file from Mac to Ubuntu Desktop
+      copy:
+        src: "{{ reaper_tar_local }}"
+        dest: "{{ reaper_tar_remote }}"
+        owner: l42i
+        group: l42i
+        mode: "0644"
+
+    - name: Extract REAPER tar file on Ubuntu
+      unarchive:
+        src: "{{ reaper_tar_remote }}"
+        dest: "{{ reaper_remote_dir }}"
+        remote_src: yes
+        owner: l42i
+        group: l42i
+
+    - name: Find REAPER install script
+      find:
+        paths: "{{ reaper_remote_dir }}"
+        patterns: install-reaper.sh
+        recurse: yes
+      register: reaper_installer
+
+    - name: Install REAPER system-wide
+      command: >
+        {{ reaper_installer.files[0].path }}
+        --install {{ reaper_install_dir }}
+        --integrate-desktop
+        --usr-local-bin-symlink
+      args:
+        creates: /opt/REAPER/reaper
